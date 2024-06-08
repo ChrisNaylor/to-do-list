@@ -69,10 +69,18 @@ class TaskController extends Controller
         try {
             $validatedData = $request->validate([
                 'name' => 'required|max:255',
+                'completed' => 'required|boolean',
             ]);
 
             $task = Task::findOrFail($id);
-            $task->name = $validatedData['name'];
+
+            if ($request->has('name')) {
+                $task->name = $validatedData['name'];
+            }
+
+            if ($request->has('completed')) {
+                $task->completed = $validatedData['completed'];
+            }
 
             $task->save();
 

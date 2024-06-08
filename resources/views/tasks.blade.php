@@ -32,12 +32,19 @@
             <ul class="list-disc list-inside">
                 @foreach($tasks as $task)
                     <li class="text-gray-700 text-base flex justify-between items-center mb-2">
-                        <a href="#" class="edit-link hover:text-blue-500" data-id="{{ $task->id }}" data-name="{{ $task->name }}">{{ $task->name }}</a>
-                        <button type="button" class="delete-task bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline" data-id="{{ $task->id }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
+                        <a href="#" class="edit-link hover:text-blue-500 @if($task->completed) line-through @endif" data-id="{{ $task->id }}" data-name="{{ $task->name }}" data-completed="{{ $task->completed }}">{{ $task->name }}</a>
+                        <div class="actions">
+                            <button type="button" class="complete-task bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline mr-2 @if($task->completed) opacity-50 cursor-not-allowed @endif"  data-id="{{ $task->id }}" data-name="{{ $task->name }}" data-completed="{{ $task->completed }}" @if($task->completed) disabled @endif>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </button>
+                            <button type="button" class="delete-task bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline" data-id="{{ $task->id }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
                     </li>
                 @endforeach
             </ul>
@@ -48,7 +55,11 @@
             <h2 class="text-2xl mb-4">Edit Task</h2>
             <form id="edit-form">
                 <input type="hidden" id="edit-id">
-                <input type="text" id="edit-name" class="border p-2 w-full">
+                <input type="text" id="edit-name" class="border p-2 w-full mb-2">
+                <div class="flex items-center">
+                    <input type="checkbox" id="edit-completed" class="mr-2">
+                    <label for="edit-completed" class="text-gray-700">Completed</label>
+                </div>
                 <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-4">Save</button>
             </form>
         </div>
@@ -61,6 +72,7 @@
         const form = document.getElementById('edit-form');
         const editId = document.getElementById('edit-id');
         const editName = document.getElementById('edit-name');
+        const editCompleted = document.getElementById('edit-completed');
 
         /**
          * Handles the opening of the modal to edit a task.
@@ -71,6 +83,7 @@
                 event.preventDefault();
                 editId.value = this.dataset.id;
                 editName.value = this.dataset.name;
+                editCompleted.checked = this.dataset.completed === '1';
                 modal.classList.remove('hidden');
             });
         });
@@ -79,7 +92,7 @@
          * Handles the form submission for updating a task. Sends a PUT request to the server with the updated task name.
          * If request is successful, reload the page otherwise an alert is shown with the error message.
          */
-         form.addEventListener('submit', function(event) {
+        form.addEventListener('submit', function(event) {
             event.preventDefault();
             fetch('/api/tasks/' + editId.value, {
                 method: 'PUT',
@@ -88,7 +101,8 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    name: editName.value
+                    name: editName.value,
+                    completed: editCompleted.checked
                 })
             }).then(response => response.json())
             .then(data => {
@@ -100,6 +114,38 @@
                 }
             }).catch(error => {
                 console.error('Error:', error);
+            });
+        });
+
+        /**
+         * Handles the completion of a task. Sends a PUT request to the server with the task ID and the completed status.
+         * If the request is successful, reload the page otherwise an alert is shown with the error message.
+         */
+        document.querySelectorAll('.complete-task').forEach(button => {
+            button.addEventListener('click', function() {
+                if (confirm('Are you sure you want to mark this task as completed?')) {
+                    fetch('/api/tasks/' + this.dataset.id, {
+                        method: 'PUT',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            name: this.dataset.name,
+                            completed: true
+                        })
+                    }).then(response => response.json())
+                    .then(data => {
+                        if (data.message) {
+                            alert(data.message);
+                            location.reload();
+                        } else {
+                            alert('Error: ' + data.error);
+                        }
+                    }).catch(error => {
+                        console.error('Error:', error);
+                    });
+                };
             });
         });
 
