@@ -2,9 +2,15 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
+html {
+    background-color: rgba(241,241,241,1);
+}
 .delete-task:hover .tooltip {
     opacity: 1;
 }
 .tooltip {
     transition: opacity 0.3s ease;
+}
+.border-grey-custom {
+    border-color: rgba(227,227,227,1);
 }
