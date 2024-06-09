@@ -121,4 +121,33 @@ class TaskController extends Controller
             return response()->json(['message' => 'Error deleting task: ' . $e->getMessage()], 500);
         }
     }
+
+    /**
+     * Mark a task as completed, used when JS is disabled
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function completeTask(Request $request, $id)
+    {
+        $task = Task::findOrFail($id); // Assuming you have a Task model
+        $task->completed = true; // Set the completed status to true
+        $task->save(); // Save the task
+
+        return redirect('/'); // Redirect to the index page
+    }
+
+    /**
+     * Delete a task, used when JS is disabled
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function deleteTask(Request $request, $id)
+    {
+        $task = Task::findOrFail($id); // Assuming you have a Task model
+        $task->delete(); // Delete the task
+
+        return redirect('/'); // Redirect to the index page
+    }
 }

@@ -9,6 +9,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <noscript>
+        <style>
+            .js-disabled {display:none!important;}
+        </style>
+    </noscript>
+
 </head>
 
 <body class="min-h-screen">
@@ -51,14 +57,17 @@
                                     <td class="py-2 px-4">{{ $task->id }}</td>
                                     <td class="py-2 px-4">
                                         <a href="#"
-                                            class="edit-link hover:text-blue-500 @if ($task->completed) line-through @endif"
+                                            class="js-disabled edit-link hover:text-blue-500 @if ($task->completed) line-through @endif"
                                             data-id="{{ $task->id }}" data-name="{{ $task->name }}"
                                             data-completed="{{ $task->completed }}">{{ $task->name }}</a>
+                                        <noscript>
+                                            <p class="@if ($task->completed) line-through @endif">{{ $task->name }}</p>
+                                        </noscript>
                                     </td>
                                     <td class="py-2 px-4">
                                         <div class="actions flex flex-row justify-center">
-                                            <button type="button"
-                                                class="complete-task bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline mr-2 @if ($task->completed) opacity-50 cursor-not-allowed @endif"
+                                            <button type="submit"
+                                                class="js-disabled complete-task bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline mr-2 @if ($task->completed) opacity-50 cursor-not-allowed @endif"
                                                 data-id="{{ $task->id }}" data-name="{{ $task->name }}"
                                                 data-completed="{{ $task->completed }}"
                                                 @if ($task->completed) disabled @endif>
@@ -68,8 +77,25 @@
                                                         stroke-width="2" d="M5 13l4 4L19 7"></path>
                                                 </svg>
                                             </button>
+                                            <noscript>
+                                                <form id="complete-task-form-{{ $task->id }}" action="{{ route('tasks.complete', $task->id) }}" method="post">
+                                                    @csrf
+                                                    <button type="submit"
+                                                        class="complete-task bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline mr-2 @if ($task->completed) opacity-50 cursor-not-allowed @endif"
+                                                        data-id="{{ $task->id }}" data-name="{{ $task->name }}"
+                                                        data-completed="{{ $task->completed }}"
+                                                        @if ($task->completed) disabled @endif>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                            viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            </noscript>
+
                                             <button type="button"
-                                                class="delete-task bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline"
+                                                class="js-disabled delete-task bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline"
                                                 data-id="{{ $task->id }}">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                     viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6">
@@ -77,6 +103,20 @@
                                                         stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                                 </svg>
                                             </button>
+                                            <noscript>
+                                                <form id="delete-task-form-{{ $task->id }}" action="{{ route('tasks.deleteTask', $task->id) }}" method="post">
+                                                    @csrf
+                                                    <button type="submit"
+                                                        class="delete-task bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline"
+                                                        data-id="{{ $task->id }}">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                            viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            </noscript>
                                         </div>
                                     </td>
                                 </tr>

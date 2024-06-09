@@ -17,3 +17,5 @@ use App\Http\Controllers\TaskController;
 
 Route::get('/', [TaskController::class, 'index'])->name('tasks.index');
 Route::post('/', [TaskController::class, 'store'])->name('tasks.store');
+Route::post('/complete-task/{id}', [TaskController::class, 'completeTask'])->name('tasks.complete');
+Route::post('/delete-task/{id}', [TaskController::class, 'deleteTask'])->name('tasks.deleteTask');
