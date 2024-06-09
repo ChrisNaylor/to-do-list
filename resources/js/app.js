@@ -1,2 +1,2 @@
-require('./bootstrap');
-require('./components/deleteTask');
+import './bootstrap';
+import './_custom';
