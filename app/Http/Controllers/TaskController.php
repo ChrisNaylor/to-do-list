@@ -18,6 +18,25 @@ class TaskController extends Controller
 
         return view('tasks', ['tasks' => $tasks]); // Pass the tasks to the view
     }
+    /**
+     * List all tasks for API endpoint.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function apiListAllTasks()
+    {
+        $tasks = Task::all(); // Fetch all tasks from the database
+
+        $formattedTasks = $tasks->map(function ($task) {
+            return [
+                'id' => $task->id,
+                'name' => $task->name,
+                'completed' => $task->completed,
+            ];
+        });
+
+        return response()->json($formattedTasks); // Return tasks as JSON
+    }
 
     /**
      * Save new tasks.
@@ -30,6 +49,7 @@ class TaskController extends Controller
 
         $task = new Task;
         $task->name = $request->name;
+        $task->completed = 0;
         $task->save();
 
         return $this->index();
@@ -66,28 +86,24 @@ class TaskController extends Controller
      */
     public function update(Request $request, $id)
     {
-        try {
-            $validatedData = $request->validate([
-                'name' => 'required|max:255',
-                'completed' => 'required|boolean',
-            ]);
+        $validatedData = $request->validate([
+            'name' => 'required|max:255',
+            'completed' => 'required|boolean',
+        ]);
 
-            $task = Task::findOrFail($id);
+        $task = Task::findOrFail($id);
 
-            if ($request->has('name')) {
-                $task->name = $validatedData['name'];
-            }
-
-            if ($request->has('completed')) {
-                $task->completed = $validatedData['completed'];
-            }
-
-            $task->save();
-
-            return response()->json(['message' => 'Task updated successfully'], 200);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Error updating task: ' . $e->getMessage()], 500);
+        if ($request->has('name')) {
+            $task->name = $validatedData['name'];
         }
+
+        if ($request->has('completed')) {
+            $task->completed = $validatedData['completed'];
+        }
+
+        $task->save();
+
+        return response()->json(['message' => 'Task updated successfully'], 200);
     }
 
     /**
